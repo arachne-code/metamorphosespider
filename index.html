@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arachne's Tale</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+        }
+
+        #input-line {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        #prompt {
+            color: #00ff00;
+            margin-right: 10px;
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            flex-grow: 1;
+            outline: none;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: #00ff00;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .ascii-art {
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+    <div id="input-line">
+        <span id="prompt">>></span>
+        <input type="text" id="command-input" autofocus>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('command-input');
+        
+        const asciiArt = `
+                        /\\___/\\
+                       /  ○ ○  \\
+                      (    ^    )
+                       \\  \\_/  /
+                    /\\  \\_____/  /\\
+                   /  \\    |    /  \\
+                  /    \\   |   /    \\
+             ____/  /\\  \\  |  /  /\\  \\____
+            /     \\/  \\  \\ | /  /  \\/     \\
+           /  /\\      /   \\|/   \\      /\\  \\
+     _____/  /  \\    /         \\    /  \\  \\_____
+    /      \\/    \\  /           \\  /    \\/      \\
+   /   /\\       / \\/             \\/ \\       /\\   \\
+  /   /  \\_____/                     \\_____/  \\   \\
+ /   /                                         \\   \\
+/___/                                           \\___\\
+
+           .:[ ARACHNE THE WEAVER ]:.
+     "Pride comes before the transformation"
+`;
+
+        const sections = [
+            "BkVI:1-25 Arachne rejects Minerva\nTritonian Minerva had listened to every word, and approved of the Aonian Muses's song, and their justified indignation. Then she said, to herself, 'To give praise is not enough, let me be praised as well, and not allow my divine powers to be scorned without inflicting punishment.' Her thoughts turned to Arachne, of Maeonia, whom she had heard would not give her due credit, in the art of spinning. The girl was not known for her place of birth, or family, but for her skill. Her father, Idmon of Colophon, dyed the absorbent wool purple, with Phocaean murex. Her mother was dead. She too had been of humble birth, and the father the same. Nevertheless, though she lived in a modest home, in little Hypaepa, Arachne had gained a name for artistry, throughout the cities of Lydia.",
+            
+            "Bk VI:26-69 Pallas Minerva challenges Arachne\nPallas Minerva took the shape of an old woman: adding grey hair to her temples, and ageing her limbs, which she supported with a stick. Then she spoke, to the girl, as follows. 'Not everything old age has is to be shunned: knowledge comes with advancing years. Do not reject my advice: seek great fame amongst mortals for your skill in weaving, but give way to the goddess, and ask her forgiveness, rash girl, with a humble voice: she will forgive if you will ask.' Arachne looked fiercely at her and left the work she was on: scarcely restraining her hands, and with dark anger in her face. Pallas, disguised it is true, received this answer. 'Weak-minded and worn out by tedious old age, you come here, and having lived too long destroys you. Let your daughter-in-law if you have one, let your daughter if you have one, listen to your voice. I have wisdom enough of my own. You think your advice is never heeded: that is my feeling too. Why does she not come herself? Why does she shirk this contest?",
+            
+            "Bk VI:70-102 Pallas weaves her web\nPallas Athene depicts the hill of Mars, and the court of the Aeropagus, in Cecrops's Athens, and the old dispute between Neptune and herself, as to who had the right to the city and its name. There the twelve gods sit in great majesty, on their high thrones, with Jupiter in the middle. She weaves the gods with their familiar attributes. The image of Jupiter is a royal one. There she portrays the Ocean god, standing and striking the rough stone, with his long trident, and seawater flowing from the centre of the shattered rock, a token of his claim to the city. She gives herself a shield, a sharp pointed spear, and a helmet for her head, while the aegis protects her breast. She shows an olive-tree with pale trunk, thick with fruit, born from the earth at a blow from her spear, the gods marvelling: and Victory crowns the work.",
+            
+            "Bk VI:103-128 Arachne weaves hers in reply\nThe Maeonian girl depicts Europa deceived by the form of the bull: you would have thought it a real bull and real waves. She is seen looking back to the shore she has left, and calling to her companions, displaying fear at the touch of the surging water, and drawing up her shrinking feet. Also Arachne showed Asterie, held by the eagle, struggling, and Leda lying beneath the swan's wings. She added Jupiter who, hidden in the form of a satyr, filled Antiope, daughter of Nycteus with twin offspring; who, as Amphitryon, was charmed by you, Alcmena, of Tiryns; by Danaë, as a golden shower; by Aegina, daughter of Asopus, as a flame; by Mnemosyne, as a shepherd; by Proserpine, Ceres's daughter, as a spotted snake."
+        ];
+
+        async function typeText(text, element) {
+            for (let char of text) {
+                element.textContent += char;
+                element.scrollTop = element.scrollHeight;
+                await new Promise(resolve => setTimeout(resolve, 30));
+            }
+        }
+
+        async function displayAsciiArt() {
+            const artDiv = document.createElement('div');
+            artDiv.className = 'ascii-art';
+            terminal.appendChild(artDiv);
+            await typeText(asciiArt, artDiv);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        async function displaySections() {
+            terminal.textContent = '';
+            await displayAsciiArt();
+            for (let section of sections) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'section';
+                terminal.appendChild(sectionDiv);
+                await typeText(section + '\n\n', sectionDiv);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            input.value = '';
+            input.focus();
+        }
+
+        input.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const command = input.value.trim().toLowerCase();
+                if (command === 'start') {
+                    displaySections();
+                } else {
+                    terminal.textContent += `>> ${command}\nCommand not recognized. Type 'start' to begin the story.\n\n`;
+                    input.value = '';
+                }
+            }
+        });
+
+        // Initial instruction
+        terminal.textContent = "Type 'start' and press Enter to begin the tale of Arachne...\n\n";
+    </script>
+</body>
+</html>
